@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тамагочи + Задачи — виртуальный питомец, который растёт от твоих дел</title>
+    <meta name="description" content="Тамагочи нового поколения: заботься о питомце, выполняй задачи, качай знания. Бесплатно, без рекламы, работает офлайн.">
+    <meta name="keywords" content="тамагочи, задачи, todo, питомец, продуктивность, python, десктоп">
+
+    <!-- Open Graph (для соцсетей) -->
+    <meta property="og:title" content="Тамагочи + Задачи">
+    <meta property="og:description" content="Виртуальный питомец, который растёт от твоих дел.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="images/preview.png">
+
+    <link rel="icon" type="image/png" href="images/favicon.png">
+
+    <style>
+        /* ========== RESET & BASE ========== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #1a1a1a;
+            --bg-alt: #2b2b2b;
+            --bg-card: #262626;
+            --text: #f0f0f0;
+            --text-dim: #888;
+            --accent: #4CAF50;
+            --orange: #FF9800;
+            --pink: #E91E63;
+            --blue: #2196F3;
+            --cyan: #00BCD4;
+            --red: #f44336;
+            --yellow: #FFEB3B;
+            --border: #333;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                         Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        a { color: var(--accent); text-decoration: none; transition: 0.2s; }
+        a:hover { color: #66BB6A; }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* ========== NAVIGATION ========== */
+        nav {
+            position: sticky;
+            top: 0;
+            background: rgba(26, 26, 26, 0.92);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+            padding: 15px 0;
+        }
+
+        nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.3em;
+            font-weight: 800;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo span { color: var(--accent); }
+
+        nav ul {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+
+        nav ul a {
+            color: var(--text-dim);
+            font-size: 0.95em;
+            font-weight: 500;
+        }
+
+        nav ul a:hover { color: var(--text); }
+
+        .btn-download-nav {
+            background: var(--accent);
+            color: white !important;
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .btn-download-nav:hover { background: #66BB6A; color: white !important; }
+
+        /* ========== HERO ========== */
+        .hero {
+            padding: 80px 0 60px;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 700px; height: 400px;
+            background: radial-gradient(circle, rgba(76,175,80,0.15) 0%, transparent 70%);
+            z-index: -1;
+            filter: blur(60px);
+        }
+
+        .hero h1 {
+            font-size: clamp(2em, 5vw, 3.5em);
+            font-weight: 800;
+            margin-bottom: 20px;
+            line-height: 1.15;
+            letter-spacing: -1px;
+        }
+
+        .hero h1 .gradient {
+            background: linear-gradient(90deg, var(--accent), var(--cyan), var(--yellow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p.subtitle {
+            font-size: 1.2em;
+            color: var(--text-dim);
+            max-width: 640px;
+            margin: 0 auto 35px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1em;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #66BB6A;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(76,175,80,0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-alt);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: #3a3a3a;
+            border-color: var(--accent);
+        }
+
+        .hero-meta {
+            margin-top: 30px;
+            color: var(--text-dim);
+            font-size: 0.9em;
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+
+        /* ========== SECTIONS ========== */
+        section { padding: 80px 0; }
+
+        section h2 {
+            font-size: clamp(1.6em, 3.5vw, 2.3em);
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        section h2 + .section-sub {
+            text-align: center;
+            color: var(--text-dim);
+            max-width: 600px;
+            margin: 0 auto 50px;
+            font-size: 1.05em;
+        }
+
+        /* ========== FEATURES ========== */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .feature-card {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .feature-icon {
+            font-size: 2.2em;
+            margin-bottom: 15px;
+        }
+
+        .feature-card h3 {
+            font-size: 1.15em;
+            margin-bottom: 10px;
+            color: var(--text);
+        }
+
+        .feature-card p {
+            color: var(--text-dim);
+            font-size: 0.95em;
+        }
+
+        /* ========== SCREENSHOTS ========== */
+        .screenshots {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .screenshot {
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: var(--bg-alt);
+            transition: 0.3s;
+        }
+
+        .screenshot:hover {
+            border-color: var(--accent);
+            transform: scale(1.02);
+        }
+
+        .screenshot img {
+            width: 100%;
+            display: block;
+        }
+
+        .screenshot-placeholder {
+            aspect-ratio: 16/10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-dim);
+            font-size: 3em;
+            background: linear-gradient(135deg, #2b2b2b, #1a1a1a);
+        }
+
+        /* ========== DOWNLOAD ========== */
+        .download-section {
+            background: linear-gradient(180deg, var(--bg), var(--bg-alt));
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .download-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .download-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 35px 25px;
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .download-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+        }
+
+        .download-card .os-icon { font-size: 3em; margin-bottom: 15px; }
+        .download-card h3 { margin-bottom: 8px; }
+        .download-card .version { color: var(--text-dim); font-size: 0.85em; margin-bottom: 20px; }
+
+        .download-card .btn {
+            padding: 10px 24px;
+            font-size: 0.9em;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .download-note {
+            text-align: center;
+            margin-top: 30px;
+            color: var(--text-dim);
+            font-size: 0.9em;
+        }
+
+        /* ========== STEPS ========== */
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 25px;
+        }
+
+        .step {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .step-num {
+            display: inline-flex;
+            width: 50px; height: 50px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: white;
+            font-weight: 800;
+            font-size: 1.3em;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .step h3 { margin-bottom: 8px; }
+        .step p { color: var(--text-dim); font-size: 0.95em; }
+
+        /* ========== FAQ ========== */
+        .faq { max-width: 800px; margin: 0 auto; }
+
+        .faq-item {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .faq-question {
+            padding: 18px 22px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            user-select: none;
+            transition: 0.2s;
+        }
+
+        .faq-question:hover { background: #333; }
+
+        .faq-question::after {
+            content: "+";
+            font-size: 1.5em;
+            color: var(--accent);
+            transition: 0.2s;
+            line-height: 1;
+        }
+
+        .faq-item.open .faq-question::after {
+            content: "−";
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            color: var(--text-dim);
+        }
+
+        .faq-item.open .faq-answer { max-height: 500px; }
+
+        .faq-answer-inner {
+            padding: 0 22px 20px;
+            font-size: 0.95em;
+        }
+
+        /* ========== FOOTER ========== */
+        footer {
+            padding: 40px 0 30px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.9em;
+        }
+
+        footer .social {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        footer .social a {
+            color: var(--text-dim);
+            font-size: 1.2em;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            width: 44px; height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+
+        footer .social a:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        /* ========== ANIMATIONS ========== */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-up { animation: fadeUp 0.6s ease-out; }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 720px) {
+            nav ul { display: none; }
+            .hero { padding: 50px 0 40px; }
+            section { padding: 50px 0; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<nav>
+    <div class="container">
+        <div class="logo">🐣 Тамагочи<span>+</span>Задачи</div>
+        <ul>
+            <li><a href="#features">Возможности</a></li>
+            <li><a href="#screenshots">Скриншоты</a></li>
+            <li><a href="#faq">FAQ</a></li>
+            <li><a href="#download" class="btn-download-nav">Скачать</a></li>
+        </ul>
+    </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+    <div class="container fade-up">
+        <h1>Виртуальный питомец,<br><span class="gradient">который растёт от твоих дел</span></h1>
+        <p class="subtitle">
+            Заботься о питомце, выполняй задачи в 7 вкладках, качай знания.
+            Бесплатно, без рекламы, работает полностью офлайн.
+        </p>
+        <div class="hero-buttons">
+            <a href="#download" class="btn btn-primary">
+                ⬇ Скачать бесплатно
+            </a>
+            <a href="#features" class="btn btn-secondary">
+                ✨ Узнать больше
+            </a>
+        </div>
+        <div class="hero-meta">
+            <span>✓ Windows 10/11</span>
+            <span>✓ Python 3.9+</span>
+            <span>✓ 0 рекламы</span>
+            <span>✓ Работает офлайн</span>
+        </div>
+    </div>
+</section>
+
+<!-- ============ FEATURES ============ -->
+<section id="features">
+    <div class="container">
+        <h2>Всё в одном приложении</h2>
+        <p class="section-sub">
+            7 тематических вкладок, у каждой свой питомец и свои задачи.
+            Твои дела напрямую влияют на игровой прогресс.
+        </p>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🍎</div>
+                <h3>7 вкладок</h3>
+                <p>Еда, Спорт, Аптека, Сон, Ванна, Игры и Учёба — каждая со своим фоном и бонусами.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📋</div>
+                <h3>Задачи = прогресс</h3>
+                <p>Ввёл задачу — она сразу выполнена. Питомец получает бонусы, ты — результат.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">👤</div>
+                <h3>Профиль и ИМТ</h3>
+                <p>Введи вес, рост, возраст, цель — и получай персональные модификаторы игры.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔐</div>
+                <h3>Аккаунты</h3>
+                <p>Один человек = один аккаунт. Email + пароль, пароль хэшируется (SHA-256 + соль).</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎨</div>
+                <h3>Свой аватар</h3>
+                <p>Загружай PNG с прозрачностью — питомец будет выглядеть так, как хочешь ты.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💾</div>
+                <h3>Автосохранение</h3>
+                <p>Все данные в <code>%APPDATA%</code>. История задач чистится сама, прогресс не теряется.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📧</div>
+                <h3>Подтверждение email</h3>
+                <p>При регистрации приходит код на почту через Brevo. Никаких паролей приложений.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🌐</div>
+                <h3>Офлайн</h3>
+                <p>Работает без интернета. Интернет нужен только для регистрации/входа через Google.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <h3>Связь с реальностью</h3>
+                <p>Цель «Похудеть» усиливает спорт ×1.5 и ослабляет еду ×0.7. Играй со смыслом.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ SCREENSHOTS ============ -->
+<section id="screenshots" style="background: var(--bg-alt);">
+    <div class="container">
+        <h2>Как это выглядит</h2>
+        <p class="section-sub">
+            Тёмная тема, крупный аватар, статы сверху, задачи справа — ничего лишнего.
+        </p>
+        <div class="screenshots">
+            <div class="screenshot">
+                <div class="screenshot-placeholder">🍎</div>
+            </div>
+            <div class="screenshot">
+                <div class="screenshot-placeholder">🏋</div>
+            </div>
+            <div class="screenshot">
+                <div class="screenshot-placeholder">👤</div>
+            </div>
+        </div>
+        <p style="text-align: center; color: var(--text-dim); margin-top: 25px; font-size: 0.9em;">
+            Замени плейсхолдеры на реальные скриншоты: положи файлы в <code>images/</code>
+            и замени <code>&lt;div class="screenshot-placeholder"&gt;🍎&lt;/div&gt;</code>
+            на <code>&lt;img src="images/screen-food.png" alt="Вкладка Еда"&gt;</code>.
+        </p>
+    </div>
+</section>
+
+<!-- ============ DOWNLOAD ============ -->
+<section id="download" class="download-section">
+    <div class="container">
+        <h2>Скачать</h2>
+        <p class="section-sub">
+            Бесплатно, без регистрации на сайте. После установки понадобится Python 3.9+
+        </p>
+        <div class="download-cards">
+            <div class="download-card">
+                <div class="os-icon">🪟</div>
+                <h3>Windows</h3>
+                <p class="version">v1.0 · 12 МБ</p>
+                <a href="#" class="btn btn-primary" onclick="alert('Замени href на ссылку с файлом .exe или .zip'); return false;">
+                    ⬇ Скачать .zip
+                </a>
+            </div>
+            <div class="download-card">
+                <div class="os-icon">🐍</div>
+                <h3>Исходники</h3>
+                <p class="version">Python · .py</p>
+                <a href="#" class="btn btn-secondary" onclick="alert('Замени href на ссылку с GitHub'); return false;">
+                    📂 Открыть на GitHub
+                </a>
+            </div>
+            <div class="download-card">
+                <div class="os-icon">📖</div>
+                <h3>Инструкция</h3>
+                <p class="version">Установка за 3 шага</p>
+                <a href="#install" class="btn btn-secondary">
+                    📘 Как установить
+                </a>
+            </div>
+        </div>
+        <p class="download-note">
+            💡 <strong>Первый запуск?</strong> Скачай Python с
+            <a href="https://www.python.org/downloads/" target="_blank" rel="noopener">python.org</a>,
+            поставь галочку «Add to PATH», установи Pillow командой
+            <code style="background: #1a1a1a; padding: 2px 8px; border-radius: 4px;">pip install pillow</code>
+            и запусти <code style="background: #1a1a1a; padding: 2px 8px; border-radius: 4px;">todo.py</code>.
+        </p>
+    </div>
+</section>
+
+<!-- ============ INSTALL STEPS ============ -->
+<section id="install">
+    <div class="container">
+        <h2>Установка за 3 шага</h2>
+        <p class="section-sub">Никаких установщиков, реестра и «Next-Next-Finish»</p>
+        <div class="steps">
+            <div class="step">
+                <div class="step-num">1</div>
+                <h3>Скачай Python</h3>
+                <p>python.org → Download → установи с галочкой «Add to PATH».</p>
+            </div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <h3>Поставь Pillow</h3>
+                <p>В командной строке: <code>pip install pillow</code> — для картинок.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <h3>Запусти приложение</h3>
+                <p>Скачай <code>todo.py</code>, дважды кликни — и всё работает.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section id="faq" style="background: var(--bg-alt);">
+    <div class="container">
+        <h2>Частые вопросы</h2>
+        <p class="section-sub">Если чего-то нет ниже — напиши мне в Telegram или на почту</p>
+        <div class="faq">
+            <div class="faq-item">
+                <div class="faq-question">Где хранятся мои данные?</div>
+                <div class="faq-answer"><div class="faq-answer-inner">
+                    Всё локально, в папке <code>%APPDATA%\Tamagotchi</code>. Питомец, задачи, профиль
+                    и настройки — в отдельных файлах <code>pet.json</code> и <code>tasks.json</code>.
+                    Ничего не уходит на сервер, кроме писем подтверждения при регистрации.
+                </div></div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Нужен ли интернет?</div>
+                <div class="faq-answer"><div class="faq-answer-inner">
+                    Нет. После первого входа приложение работает полностью офлайн.
+                    Интернет нужен только для регистрации (код на email) и входа через Google.
+                </div></div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Можно ли иметь несколько аккаунтов?</div>
+                <div class="faq-answer"><div class="faq-answer-inner">
+                    Да. Каждый аккаунт — отдельный email + пароль. У каждого свой питомец,
+                    задачи, профиль и настройки фонов. Кнопка 🚪 в шапке — выход к окну входа.
+                </div></div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Как удалить аккаунт?</div>
+                <div class="faq-answer"><div class="faq-answer-inner">
+                    Удалить папку <code>%APPDATA%\Tamagotchi\accounts\&lt;имя_папки&gt;</code>
+                    и запись в <code>users.json</code>. Или просто зарегистрируй новый email —
+                    данные старого останутся, но ты их не увидишь.
+                </div></div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Питомец может умереть?</div>
+                <div class="faq-answer"><div class="faq-answer-inner">
+                    Да, если здоровье упадёт до 0. Но кнопка 🔄 появляется только при смерти —
+                    в остальное время её нет, чтобы не сбивать с толку.
+                </div></div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Платно ли это?</div>
+                <div class="faq-answer"><div class="faq-answer-inner">
+                    Полностью бесплатно. Исходники открыты — можешь менять, форкать, улучшать.
+                </div></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+    <div class="container">
+        <div class="social">
+            <a href="#" title="GitHub" onclick="alert('Замени href на свой GitHub'); return false;">🐙</a>
+            <a href="#" title="Telegram" onclick="alert('Замени href на свой Telegram'); return false;">✈</a>
+            <a href="#" title="Email" onclick="alert('Замени href на mailto:твой@email'); return false;">✉</a>
+            <a href="#" title="YouTube" onclick="alert('Замени href на свой YouTube'); return false;">▶</a>
+        </div>
+        <p>© 2026 Тамагочи + Задачи · Сделано с ❤ и Python</p>
+        <p style="margin-top: 8px; font-size: 0.85em;">
+            <a href="#">Политика конфиденциальности</a> ·
+            <a href="#">Условия использования</a> ·
+            <a href="#">Обратная связь</a>
+        </p>
+    </div>
+</footer>
+
+<!-- ============ JS ============ -->
+<script>
+    // FAQ аккордеон
+    document.querySelectorAll('.faq-question').forEach(q => {
+        q.addEventListener('click', () => {
+            const item = q.parentElement;
+            item.classList.toggle('open');
+        });
+    });
+
+    // Плавное появление секций при скролле
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('fade-up');
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('section').forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
